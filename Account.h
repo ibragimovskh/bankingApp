@@ -24,6 +24,7 @@ class Account {
         float getBalance() { return balance; };  
         int getAccountNumber() {return accountNumber;};
         void printTransactionHistory() const; 
+        void generateAccountStatement(const std::string &startDate, const std::string &endDate) const; 
 };
 
 
