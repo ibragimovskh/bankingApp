@@ -156,3 +156,17 @@ bool SavingsAccount::calculateInterest() {
         return false;
     }
 }
+
+void CheckingAccount::withdraw(float amount) {
+    if (currentBalance + overdraftLimit >= amount) {
+        currentBalance -= amount;
+
+        Transaction transaction;
+        transaction.type = "Withdrawal";
+        transaction.amount = amount;
+        transaction.timestamp = getCurrentTimestamp();
+        transactionHistory.push_back(transaction);
+    } else {
+        throw std::invalid_argument("Withdrawal exceeds overdraft limit");
+    }
+}

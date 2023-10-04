@@ -8,7 +8,7 @@ struct Transaction {
 };
 
 class Account {
-private:
+protected:
     std::string name;
     int accountNumber;
     float initialBalance;
@@ -47,5 +47,6 @@ private:
 
 public:
     CheckingAccount(std::string name, float initialBalance, float overdraftLimit);
+    void withdraw(float amount);
     void applyOverdraft(float amount);
 };
