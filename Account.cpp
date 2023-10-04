@@ -3,6 +3,7 @@
 #include <string> 
 #include <iostream> 
 #include <ctime>
+#include <chrono>
 
 int Account::lastAccountNumber = 1000; 
 
@@ -115,4 +116,43 @@ void Account::generateAccountStatement(const std::string& startDate, const std::
     // Print the initial balance and balance at the end of the statement period
     std::cout << "Initial Balance: " << initialBalance << std::endl;
     std::cout << "Balance at the end of the statement period: " << balanceAtStart << std::endl;
+}
+
+// SAVINGS & CHECKINGS
+
+SavingsAccount::SavingsAccount(std::string name, float initialBalance, float interestRate)
+    : Account(name, initialBalance), interestRate(interestRate) {
+    lastInterestCalculation = std::chrono::system_clock::now(); // Initialize the last calculation time
+}
+
+CheckingAccount::CheckingAccount(std::string name, float initialBalance, float overdraftLimit)
+    : Account(name, initialBalance), overdraftLimit(overdraftLimit) {
+}
+
+bool SavingsAccount::calculateInterest() {
+    std::chrono::system_clock::time_point currentTime = std::chrono::system_clock::now();
+    std::chrono::duration<double> timeSinceLastCalculation = currentTime - lastInterestCalculation;
+
+    // Debugging output
+    std::cout << "Time since last calculation (seconds): " << timeSinceLastCalculation.count() << std::endl;
+    // it is set to 86400 now, but for testing purposes you can change it to 2
+    if (timeSinceLastCalculation.count() >= 24 * 60 * 60) {
+        // Calculate the daily interest rate
+        float dailyInterestRate = interestRate / 365.0;
+
+        // Calculate the daily interest
+        float dailyInterest = currentBalance * dailyInterestRate;
+
+        // Add the daily interest to the current balance
+        currentBalance += dailyInterest;
+
+        // Update the last calculation time
+        lastInterestCalculation = currentTime;
+
+        // Interest calculation successful
+        return true;
+    } else {
+        std::cerr << "Interest calculation failed. Too soon since the last calculation" << std::endl;
+        return false;
+    }
 }
