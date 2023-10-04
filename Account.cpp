@@ -4,6 +4,15 @@
 #include <iostream> 
 #include <ctime>
 
+int Account::lastAccountNumber = 1000; 
+
+Account::Account(std::string name, float initialBalance) : name(name), initialBalance(initialBalance) ,currentBalance(initialBalance) { 
+    if(initialBalance < 0) { 
+        throw std::invalid_argument("Initial balance cannot be negative");
+    }
+    accountNumber = ++lastAccountNumber;
+};
+
 std::string Account::getCurrentTimestamp() const { 
     time_t currentTime;
     struct tm* timeInfo; 
@@ -16,20 +25,13 @@ std::string Account::getCurrentTimestamp() const {
     return std::string(buffer);
 }
 
-int Account::lastAccountNumber = 1000; 
-
-Account::Account(std::string name, float initialBalance) : name(name), balance(initialBalance) { 
-    if(initialBalance < 0) { 
-        throw std::invalid_argument("Initial balance cannot be negative");
-    }
-    accountNumber = ++lastAccountNumber;
-};
 
 void Account::deposit(float amount)  {
-    if(amount < 0) { 
+    if(amount <= 0) { 
         throw std::invalid_argument("Deposit amount cannot be negative");
+    }else { 
+        currentBalance += amount;
     }
-
     Transaction transaction; 
     transaction.type = "Deposit"; 
     transaction.amount = amount;
@@ -38,8 +40,8 @@ void Account::deposit(float amount)  {
 };
 
 void Account::withdraw(float amount) {
-    if( balance >= amount ) { 
-        balance -= amount; 
+    if( currentBalance >= amount ) { 
+        currentBalance -= amount; 
     }else { 
         throw std::invalid_argument("Insufficient funds");
     }     
@@ -81,10 +83,8 @@ void Account::generateAccountStatement(const std::string& startDate, const std::
         std::cerr << "Invalid date values." << std::endl;
         return;
     }
-
     // Initialize the balance at the start of the statement period
-    float balanceAtStart = balance;
-
+    float balanceAtStart = initialBalance;
     // Iterate through all transactions within the statement period
     for (const Transaction& transaction : transactionHistory) {
         struct tm transactionTm;
@@ -96,7 +96,6 @@ void Account::generateAccountStatement(const std::string& startDate, const std::
         }
         // Converting to seconds
         time_t transactionTime = mktime(&transactionTm);
-
         // Check if the transaction date is within the specified range
         if (transactionTime >= startTime && transactionTime <= endTime) {
             std::cout << "Type: " << transaction.type << ", Amount: " << transaction.amount
@@ -104,7 +103,7 @@ void Account::generateAccountStatement(const std::string& startDate, const std::
         }
 
         // Update the balance for each transaction within the statement period
-        if (transactionTime >= startTime) {
+        if (transactionTime >= startTime && transactionTime <= endTime) {
             if (transaction.type == "Deposit") {
                 balanceAtStart += transaction.amount;
             } else if (transaction.type == "Withdrawal") {
@@ -114,6 +113,6 @@ void Account::generateAccountStatement(const std::string& startDate, const std::
     }
 
     // Print the initial balance and balance at the end of the statement period
-    std::cout << "Initial Balance: " << balance << std::endl;
+    std::cout << "Initial Balance: " << initialBalance << std::endl;
     std::cout << "Balance at the end of the statement period: " << balanceAtStart << std::endl;
 }
